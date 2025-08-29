@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoColeta</title>
+<link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+<div id="app">
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <img src="img/ecocoleta_logo.png" class="logo" height="60" width="60" alt="EcoColeta" />
+            <div class="title">EcoColeta</div>
+        </div>
+        <a href="home.html">Painel Administrativo</a>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <h1 class="page-title">Agende sua Coleta de Recicláveis</h1>
+
+        <form id="coleta-form" class="form-card">
+
+            <!-- Dados pessoais -->
+            <div class="form-section">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="Seu e-mail" required>
+
+                <label for="telefone">Telefone</label>
+                <input type="text" id="telefone" name="telefone" placeholder="(XX) XXXX-XXXX" required>
+            </div>
+
+            <!-- Endereço -->
+            <div class="form-section">
+                <label for="rua">Rua / Número</label>
+                <div class="input-row">
+                    <input type="text" id="rua" name="rua" placeholder="Rua" required>
+                    <input type="text" id="numero" name="numero" placeholder="Número" required>
+                </div>
+
+                <label for="bairro">Bairro / Cidade</label>
+                <div class="input-row">
+                    <input type="text" id="bairro" name="bairro" placeholder="Bairro" required>
+                    <input type="text" id="cidade" name="cidade" placeholder="Cidade" required>
+                </div>
+            </div>
+
+            <!-- Data de coleta -->
+            <div class="form-section">
+                <label for="data_coleta">Data sugerida para coleta</label>
+                <input type="date" id="data_coleta" name="data_coleta" required>
+            </div>
+
+            <!-- Tipo de material -->
+            <div class="form-section">
+                <label>Tipo de material para coleta</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="material[]" value="Eletrônicos"> Eletrônicos</label>
+                    <label><input type="checkbox" name="material[]" value="Metal"> Metal</label>
+                    <label><input type="checkbox" name="material[]" value="Papel/Papelão"> Papel/Papelão</label>
+                    <label><input type="checkbox" name="material[]" value="Plástico"> Plástico</label>
+                    <label><input type="checkbox" name="material[]" value="Vidro"> Vidro</label>
+                    <label><input type="checkbox" name="material[]" value="Óleo de cozinha"> Óleo de cozinha</label>
+                </div>
+            </div>
+
+            <!-- Botão -->
+            <div class="form-section">
+                <button type="submit">Solicitar Coleta</button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<script src="lib/jquery-3.7.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#coleta-form').on('submit', function(e){
+        e.preventDefault();
+        var data = $(this).serializeArray();
+        alert('Formulário enviado!\n' + JSON.stringify(data, null, 2));
+    });
+});
+</script>
+</body>
+</html>
