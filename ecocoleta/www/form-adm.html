@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Color theme for statusbar (Android only) -->
+    <meta name="theme-color" content="#2196f3">
+    <!-- Your app title -->
+    <title>Template Tab</title>
+    <!-- Path to Framework7 Library Bundle CSS -->
+    <link rel="stylesheet" href="lib/framework7-bundle.min.css">
+    <!-- CSS PERSONALIZADO -->
+    <link rel="stylesheet" href="css/index.css">
+    <!--Ícones Material Design-->
+    <link rel="stylesheet" href="css/materialdesignicons.min.css">
+    <!-- Ícones do Material Design -->
+    <link rel="stylesheet" href="css/remixicon/remixicon.css">
+
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+</head>
+
+<body>
+    <!-- App root element -->
+    <div id="app">
+
+        <!-- Your main view -->
+        <div class="view view-main">
+
+            <!-- Initial Page -->
+            <div data-name="index" class="page auth-page color-theme-blue">
+
+                <!-- Top Navbar -->
+                <div class="navbar auth-header">
+                    <a href="index.html" class="back-btn">
+                        <i class="ri-arrow-drop-left-line"></i>
+                    </a>
+                    <div class="title">Acesse sua Conta Administrativa</div>
+                </div>
+
+                <!-- Scrollable page content -->
+                <div class="auth-page-content">
+                    <form id="coleta-form" class="login-form-card" action="adm-panel.html">
+
+                        <!-- Grupo de campos -->
+                        <div class="form-group">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="Seu e-mail" required>
+
+                            <label for="senha">Senha</label>
+                            <div class="password-input-container">
+                                <input type="password" class="password-input" id="senha" name="senha" placeholder="**********" required>
+                                <button type="button" class="btn-eye" onclick="toggleEye('senha')">
+                                    <i class="ri-eye-line"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <script>
+                            function toggleEye(id) {
+                                var input = document.getElementById(id);
+                                if (input.type === "password") {
+                                    input.type = "text";
+                                } else {
+                                    input.type = "password";
+                                }
+                            }
+                        </script>
+
+                        <!-- Botão -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-blue form-btn">Entrar</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Framework7 JS -->
+    <script type="text/javascript" src="lib/framework7-bundle.min.js"></script>
+    <!-- jQuery -->
+    <script type="text/javascript" src="lib/jquery-3.7.0.min.js"></script>
+    <!-- Roteamento -->
+    <script type="text/javascript" src="js/routes.js"></script>
+    <script src="cordova.js"></script>
+</body>
+
+</html>

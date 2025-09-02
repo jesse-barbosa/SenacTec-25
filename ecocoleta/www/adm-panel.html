@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Color theme for statusbar (Android only) -->
+    <meta name="theme-color" content="#2196f3">
+    <!-- Your app title -->
+    <title>Template Tab</title>
+    <!-- Path to Framework7 Library Bundle CSS -->
+    <link rel="stylesheet" href="lib/framework7-bundle.min.css">
+    <!-- CSS PERSONALIZADO PARA MENU-->
+    <link rel="stylesheet" href="css/index.css">
+    <!--Ícones Material Design-->
+    <link rel="stylesheet" href="css/materialdesignicons.min.css">
+    <!-- Ícones do Material Design -->
+    <link rel="stylesheet" href="css/remixicon/remixicon.css">
+
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    </style>
+
+</head>
+
+<body>
+    <!-- App root element -->
+    <div id="app">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="img/ecocoleta_logo.png" class="logo" height="60" width="60" alt="EcoColeta" />
+                <div class="title">EcoColeta</div>
+            </div>
+            <button onclick="logout()" class="logout-btn">
+                <i class="ri-logout-circle-line"></i>
+                Sair
+            </button>
+        </header>
+
+        <!-- Your main view, should have "view-main" class -->
+        <div class="view view-main">
+
+            <!-- TAB BAR-->
+            <div class="toolbar toolbar-bottom">
+                <div class="toolbar-inner display-flex">
+                    <a href="/index/" class="tab-link link active">
+                        <i class="ri-home-5-line"></i>
+                        <span>Link 1</span>
+                    </a>
+                    <a href="/link2/" class="tab-link link">
+                        <i class="ri-links-line"></i>
+                        <span>Link 2</span>
+                    </a>
+                    <a href="/link3/" class="tab-link link">
+                        <i class="ri-admin-line"></i>
+                        <span>Link 3</span>
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- Initial Page, "data-name" contains page name -->
+            <div data-name="index" class="page color-theme-blue">
+
+                <!-- Scrollable page content -->
+                <div class="page-content">
+                    <!-- Top Navbar -->
+                    <div class="navbar">
+                        <div class="navbar-inner justify-content-center">
+                            <div class="title">Painel ADM</div>
+                        </div>
+                    </div>
+                    <form id="coleta-form" class="form-card">
+                        <p class="title">Filtros</p>
+                        <div class="form-filter">
+                            <div class="input-row">
+                                <div class="item-inner dropdown-input">
+                                    <label for="data_coleta">Status</label>
+                                    <div class="item-input-wrap input-dropdown-wrap">
+                                    <select placeholder="Escolha um status">
+                                        <option value="">Todos</option>
+                                        <option value="">Ativo</option>
+                                        <option value="">Desativo</option>
+                                    </select>
+                                    </div>
+                                </div>
+                                <div class="form-section">
+                                    <label for="data_inicial">Data Início</label>
+                                    <input type="date" id="data_inicial" name="data_inicial" required>
+                                </div>
+                                <div class="form-section">
+                                    <label for="data_final">Data Final</label>
+                                    <input type="date" id="data_final" name="data_final" required>
+                                </div>
+                            </div>
+                            <div class="actions-row">
+                            <button type="submit" class="btn btn-green">
+                                Enviar
+                            </button>
+                            <button type="reset" class="reset-btn btn btn-outline">
+                                Limpar
+                            </button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-info">
+                                <p class="protocol">Protocolo #C34278901471289</p>
+                                <span class="status">Teste Status</span>
+                                </div>
+                                <button class="info info-blue">Ativo</button>
+                            </div>
+
+                            <div class="card-content">
+                                Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor
+                            </div>    
+
+                            <div class="card-footer">
+                                <button class="btn btn-green">Ver mais</button>
+                                <button class="btn btn-outline">Detalhes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        function logout() {
+            app.dialog.confirm('Tem certeza que quer sair?', function () {
+                window.location.href = 'index.html';
+                
+            }, function () {
+                console.log('Cancelado');
+            });
+        }
+    </script>
+    <!-- Path to Framework7 Library Bundle JS-->
+    <script type="text/javascript" src="lib/framework7-bundle.min.js"></script>
+	<!-- jQuery -->
+	<script type="text/javascript" src="lib/jquery-3.7.0.min.js"></script>	
+    <!-- Roteamento do app-->
+    <script type="text/javascript" src="js/routes.js"></script>
+    <script src="cordova.js"></script>
+</body>
+
+</html>
