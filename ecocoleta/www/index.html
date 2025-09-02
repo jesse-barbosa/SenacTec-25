@@ -81,12 +81,80 @@
 </div>
 
 <script src="lib/jquery-3.7.0.min.js"></script>
+<!-- Importando jsPDF + autotable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+
 <script>
 $(document).ready(function(){
     $('#coleta-form').on('submit', function(e){
         e.preventDefault();
         var data = $(this).serializeArray();
-        alert('Formulário enviado!\n' + JSON.stringify(data, null, 2));
+
+        // Mapeamento de labels amigáveis
+        const labels = {
+            nome: "Nome",
+            email: "E-mail",
+            telefone: "Telefone",
+            rua: "Rua",
+            numero: "Número",
+            bairro: "Bairro",
+            cidade: "Cidade",
+            data_coleta: "Data Coleta",
+        };
+
+        // Separar materiais e outros campos
+        let materiais = [];
+        let dadosFormatados = [];
+
+        data.forEach(item => {
+            if(item.name === "material[]"){
+                materiais.push(item.value);
+            } else {
+                let label = labels[item.name] || item.name; // usa label amigável ou o original
+                dadosFormatados.push({ campo: label, valor: item.value });
+            }
+        });
+
+        // Adicionar os materiais formatados
+        if(materiais.length > 0){
+            let labelMaterial = materiais.length > 1 ? "Materiais" : "Material";
+            dadosFormatados.push({
+                campo: labelMaterial,
+                valor: materiais.join(", ")
+            });
+        }
+
+        // Criar PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Título
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("Registro de Coleta", 105, 15, { align: "center" });
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("Dados inseridos no formulário de solicitação de coleta:", 10, 25);
+
+        // Criar tabela bonita com autoTable
+        let rows = dadosFormatados.map(item => [item.campo, item.valor]);
+
+        doc.autoTable({
+            startY: 35,
+            head: [["Campo", "Valor"]],
+            body: rows,
+            styles: { font: "helvetica", fontSize: 11 },
+            headStyles: { fillColor: [41, 128, 185] }, // azul bonito
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 10, right: 10 }
+        });
+
+        // Baixar PDF
+        doc.save("formulario.pdf");
+
+        alert('Formulário enviado e exportado para PDF!');
     });
 });
 </script>
