@@ -87,12 +87,42 @@
 
 <script>
 $(document).ready(function(){
+    let opcoes = {};
+
+    $(document).on("click", ".export-btn", function(){
+        let opcao = $(this).data("opcao");
+        opcoes[opcao]();
+    });
+
     $('#coleta-form').on('submit', function(e){
         e.preventDefault();
         var data = $(this).serializeArray();
 
+        // Função para gerar protocolo
+        function gerarProtocolo(){
+            let now = new Date();
+            let ano = now.getFullYear();
+            let mes = String(now.getMonth() + 1).padStart(2, "0");
+            let dia = String(now.getDate()).padStart(2, "0");
+            let hora = String(now.getHours()).padStart(2, "0");
+            let min = String(now.getMinutes()).padStart(2, "0");
+            let seg = String(now.getSeconds()).padStart(2, "0");
+
+            // Gerar código aleatório de 4 chars (letras e números)
+            let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let random = "";
+            for(let i = 0; i < 4; i++){
+                random += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            return `ECO-${ano}${mes}${dia}-${hora}${min}${seg}-${random}`;
+        }
+
+        let protocolo = gerarProtocolo();
+
         // Mapeamento de labels amigáveis
         const labels = {
+            protocolo: "Protocolo",
             nome: "Nome",
             email: "E-mail",
             telefone: "Telefone",
@@ -105,13 +135,15 @@ $(document).ready(function(){
 
         // Separar materiais e outros campos
         let materiais = [];
-        let dadosFormatados = [];
+        let dadosFormatados = [
+            { campo: "Protocolo", valor: protocolo }
+        ];
 
         data.forEach(item => {
             if(item.name === "material[]"){
                 materiais.push(item.value);
             } else {
-                let label = labels[item.name] || item.name; // usa label amigável ou o original
+                let label = labels[item.name] || item.name;
                 dadosFormatados.push({ campo: label, valor: item.value });
             }
         });
@@ -125,38 +157,96 @@ $(document).ready(function(){
             });
         }
 
-        // Criar PDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        // Atualiza opções de exportação
+        opcoes = {
+            ".PDF": () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-        // Título
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("Registro de Coleta", 105, 15, { align: "center" });
+                // Título
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("Registro de Coleta", 105, 15, { align: "center" });
 
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.text("Dados inseridos no formulário de solicitação de coleta:", 10, 25);
+                // Protocolo
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "italic");
+                doc.text(`Protocolo: ${protocolo}`, 105, 22, { align: "center" });
 
-        // Criar tabela bonita com autoTable
-        let rows = dadosFormatados.map(item => [item.campo, item.valor]);
+                // Mensagem inicial
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.text("Dados inseridos no formulário de solicitação de coleta:", 10, 32);
 
-        doc.autoTable({
-            startY: 35,
-            head: [["Campo", "Valor"]],
-            body: rows,
-            styles: { font: "helvetica", fontSize: 11 },
-            headStyles: { fillColor: [41, 128, 185] }, // azul bonito
-            alternateRowStyles: { fillColor: [240, 240, 240] },
-            margin: { left: 10, right: 10 }
-        });
+                // Criar tabela formatada
+                let rows = dadosFormatados.map(item => [item.campo, item.valor]);
 
-        // Baixar PDF
-        doc.save("formulario.pdf");
+                doc.autoTable({
+                    startY: 40,
+                    head: [["Campo", "Valor"]],
+                    body: rows,
+                    styles: { font: "helvetica", fontSize: 11 },
+                    headStyles: { fillColor: [41, 128, 185] },
+                    alternateRowStyles: { fillColor: [240, 240, 240] },
+                    margin: { left: 10, right: 10 }
+                });
 
-        alert('Formulário enviado e exportado para PDF!');
+                // Rodapé com protocolo
+                let pageHeight = doc.internal.pageSize.height;
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "italic");
+                doc.text(`Protocolo: ${protocolo}`, 10, pageHeight - 10);
+
+                // Baixar PDF
+                doc.save(`formulario-${protocolo}.pdf`);
+            },
+            ".TXT": () => {
+                let texto = "";
+                dadosFormatados.forEach(item => {
+                    texto += `${item.campo}: ${item.valor}\n`;
+                });
+
+                let blob = new Blob([texto], { type: "text/plain" });
+                let link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `formulario-${protocolo}.txt`;
+                link.click();
+            },
+            ".JSON": () => {
+                let dadosJson = {
+                    protocolo,
+                    dados: dadosFormatados.map(item => ({ [item.campo]: item.valor }))
+                };
+
+                let blob = new Blob([JSON.stringify(dadosJson)], { type: "application/json" });
+                let link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `formulario-${protocolo}.json`;
+                link.click();
+            }
+        };
+        
+        let opcoesHtml = Object.keys(opcoes).map(opcao => 
+            `<button class="btn btn-outline export-btn" data-opcao="${opcao}">${opcao}</button>`
+            ).join(" ");
+
+        let janela = `
+            <div class="export-window">
+                <div class="export-title">
+                    Exportar para:
+                    <button class="close-btn" onClick="$('.export-window').fadeOut(200)">
+                        X
+                    </button>
+                </div>
+                <div class="export-options">${opcoesHtml}</div>
+            </div>
+        `;
+
+        $("body").append(janela);
+        $(".export-window").fadeIn(200);
     });
 });
+
 </script>
 </body>
 </html>
