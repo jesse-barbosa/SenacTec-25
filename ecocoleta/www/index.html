@@ -21,232 +21,223 @@
     </header>
 
     <!-- Main Content -->
-    <main>
-        <h1 class="page-title">Agende sua Coleta de Recicláveis</h1>
+    <main class="main-content">
 
-        <form id="coleta-form" class="form-card">
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="agendar">Agendar Coleta</div>
+            <div class="tab" data-tab="registros">Meus Registros</div>
+        </div>
 
-            <!-- Dados pessoais -->
-            <div class="form-section">
-                <label for="nome">Nome</label>
-                <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+        <!-- Conteúdo das tabs -->
+        <div class="tab-content active" id="agendar">
+            <h1 class="page-title">Agende sua Coleta de Recicláveis</h1>
+            <form id="coleta-form" class="form-card">
 
-                <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" placeholder="Seu e-mail" required>
+                <!-- Dados pessoais -->
+                <div class="form-section">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
 
-                <label for="telefone">Telefone</label>
-                <input type="text" id="telefone" name="telefone" placeholder="(XX) XXXX-XXXX" required>
-            </div>
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="Seu e-mail" required>
 
-            <!-- Endereço -->
-            <div class="form-section">
-                <label for="rua">Rua / Número</label>
-                <div class="input-row">
-                    <input type="text" id="rua" name="rua" placeholder="Rua" required>
-                    <input type="text" id="numero" name="numero" placeholder="Número" required>
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" name="telefone" placeholder="(XX) XXXX-XXXX" required>
                 </div>
 
-                <label for="bairro">Bairro / Cidade</label>
-                <div class="input-row">
-                    <input type="text" id="bairro" name="bairro" placeholder="Bairro" required>
-                    <input type="text" id="cidade" name="cidade" placeholder="Cidade" required>
+                <!-- Endereço -->
+                <div class="form-section">
+                    <label for="rua">Rua / Número</label>
+                    <div class="input-row">
+                        <input type="text" id="rua" name="rua" placeholder="Rua" required>
+                        <input type="text" id="numero" name="numero" placeholder="Número" required>
+                    </div>
+
+                    <label for="bairro">Bairro / Cidade</label>
+                    <div class="input-row">
+                        <input type="text" id="bairro" name="bairro" placeholder="Bairro" required>
+                        <input type="text" id="cidade" name="cidade" placeholder="Cidade" required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Data de coleta -->
-            <div class="form-section">
-                <label for="data_coleta">Data sugerida para coleta</label>
-                <input type="date" id="data_coleta" name="data_coleta" required>
-            </div>
-
-            <!-- Tipo de material -->
-            <div class="form-section">
-                <label>Tipo de material para coleta</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" name="material[]" value="Eletrônicos"> Eletrônicos</label>
-                    <label><input type="checkbox" name="material[]" value="Metal"> Metal</label>
-                    <label><input type="checkbox" name="material[]" value="Papel/Papelão"> Papel/Papelão</label>
-                    <label><input type="checkbox" name="material[]" value="Plástico"> Plástico</label>
-                    <label><input type="checkbox" name="material[]" value="Vidro"> Vidro</label>
-                    <label><input type="checkbox" name="material[]" value="Óleo de cozinha"> Óleo de cozinha</label>
+                <!-- Data de coleta -->
+                <div class="form-section">
+                    <label for="data_coleta">Data sugerida para coleta</label>
+                    <input type="date" id="data_coleta" name="data_coleta" required>
                 </div>
-            </div>
 
-            <!-- Botão -->
-            <div class="form-section form-btn">
-                <button type="submit" class="btn btn-green">Solicitar Coleta</button>
-            </div>
-        </form>
+                <!-- Tipo de material -->
+                <div class="form-section">
+                    <label>Tipo de material para coleta</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="material[]" value="Eletrônicos"> Eletrônicos</label>
+                        <label><input type="checkbox" name="material[]" value="Metal"> Metal</label>
+                        <label><input type="checkbox" name="material[]" value="Papel/Papelão"> Papel/Papelão</label>
+                        <label><input type="checkbox" name="material[]" value="Plástico"> Plástico</label>
+                        <label><input type="checkbox" name="material[]" value="Vidro"> Vidro</label>
+                        <label><input type="checkbox" name="material[]" value="Óleo de cozinha"> Óleo de cozinha</label>
+                    </div>
+                </div>
+
+                <!-- Botão -->
+                <div class="form-section form-btn btn-container">
+                    <button type="submit" class="btn-green">Solicitar Coleta</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tab-content" id="registros">
+            <h1 class="page-title">Meus Registros</h1>
+            <div id="lista-registros"></div>
+        </div>
+
     </main>
 </div>
 
+<!-- Janela de exportação -->
+<div class="export-window">
+    <div class="export-title">
+        Exportar para:
+        <button class="close-btn">X</button>
+    </div>
+    <div class="export-options"></div>
+</div>
+
 <script src="lib/jquery-3.7.0.min.js"></script>
-<!-- Importando jsPDF + autotable -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
-
 <script>
 $(document).ready(function(){
-    let opcoes = {};
+    let exportRegistroData = null;
 
-    $(document).on("click", ".export-btn", function(){
-        let opcao = $(this).data("opcao");
-        opcoes[opcao]();
+    // Tabs
+    $('.tab').click(function(){
+        $('.tab').removeClass('active');
+        $(this).addClass('active');
+        let tabId = $(this).data('tab');
+        $('.tab-content').removeClass('active');
+        $('#' + tabId).addClass('active');
     });
 
-    $('#coleta-form').on('submit', function(e){
-        e.preventDefault();
-        var data = $(this).serializeArray();
+    // Protocolo
+    function gerarProtocolo(){
+        let now = new Date();
+        let ano = now.getFullYear();
+        let mes = String(now.getMonth()+1).padStart(2,"0");
+        let dia = String(now.getDate()).padStart(2,"0");
+        let hora = String(now.getHours()).padStart(2,"0");
+        let min = String(now.getMinutes()).padStart(2,"0");
+        let seg = String(now.getSeconds()).padStart(2,"0");
+        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let random = "";
+        for(let i=0;i<4;i++){ random += chars.charAt(Math.floor(Math.random()*chars.length)); }
+        return `ECO-${ano}${mes}${dia}-${hora}${min}${seg}-${random}`;
+    }
 
-        // Função para gerar protocolo
-        function gerarProtocolo(){
-            let now = new Date();
-            let ano = now.getFullYear();
-            let mes = String(now.getMonth() + 1).padStart(2, "0");
-            let dia = String(now.getDate()).padStart(2, "0");
-            let hora = String(now.getHours()).padStart(2, "0");
-            let min = String(now.getMinutes()).padStart(2, "0");
-            let seg = String(now.getSeconds()).padStart(2, "0");
+    // Salvar e exibir registros
+    function salvarRegistro(dados){
+        let registros = JSON.parse(localStorage.getItem('registros')) || [];
+        registros.push(dados);
+        localStorage.setItem('registros', JSON.stringify(registros));
+        atualizarListaRegistros();
+    }
 
-            // Gerar código aleatório de 4 chars (letras e números)
-            let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            let random = "";
-            for(let i = 0; i < 4; i++){
-                random += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+    function atualizarListaRegistros(){
+        let registros = JSON.parse(localStorage.getItem('registros')) || [];
+        let html = '';
+        registros.forEach((registro,index)=>{
+            html += `<div class="record-card">`;
+            registro.forEach(item=>{
+                html += `<div><strong>${item.campo}:</strong> ${item.valor}</div>`;
+            });
+            html += `<button class="btn-outline export-btn" data-index="${index}">Exportar</button>`;
+            html += `</div>`;
+        });
+        $('#lista-registros').html(html);
+    }
 
-            return `ECO-${ano}${mes}${dia}-${hora}${min}${seg}-${random}`;
+    // Exportação para PDF, TXT, JSON
+    function baixarRegistro(formato, registro){
+        let protocolo = registro.find(r=>r.campo==="Protocolo").valor;
+        if(formato === ".PDF"){
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont("helvetica","bold"); doc.setFontSize(16);
+            doc.text("Registro de Coleta",105,15,{align:"center"});
+            doc.setFont("helvetica","italic"); doc.setFontSize(11);
+            doc.text(`Protocolo: ${protocolo}`,105,22,{align:"center"});
+            doc.setFont("helvetica","normal"); doc.setFontSize(12);
+            doc.text("Dados inseridos no formulário de solicitação de coleta:",10,32);
+            let rows = registro.map(i=>[i.campo,i.valor]);
+            doc.autoTable({startY:40, head:[["Campo","Valor"]], body:rows, styles:{font:"helvetica",fontSize:11}, headStyles:{fillColor:[41,128,185]}, alternateRowStyles:{fillColor:[240,240,240]}, margin:{left:10,right:10}});
+            let pageHeight = doc.internal.pageSize.height;
+            doc.setFontSize(10); doc.setFont("helvetica","italic");
+            doc.text(`Protocolo: ${protocolo}`,10,pageHeight-10);
+            doc.save(`formulario-${protocolo}.pdf`);
         }
+        else if(formato === ".TXT"){
+            let texto = registro.map(i=>`${i.campo}: ${i.valor}`).join("\n");
+            let blob = new Blob([texto],{type:"text/plain"});
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `formulario-${protocolo}.txt`;
+            link.click();
+        }
+        else if(formato === ".JSON"){
+            let dadosJson = {protocolo, dados: registro.map(i=>({[i.campo]:i.valor}))};
+            let blob = new Blob([JSON.stringify(dadosJson)],{type:"application/json"});
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `formulario-${protocolo}.json`;
+            link.click();
+        }
+    }
 
+    // Submit do formulário
+    $('#coleta-form').on('submit',function(e){
+        e.preventDefault();
+        let data = $(this).serializeArray();
         let protocolo = gerarProtocolo();
 
-        // Mapeamento de labels amigáveis
-        const labels = {
-            protocolo: "Protocolo",
-            nome: "Nome",
-            email: "E-mail",
-            telefone: "Telefone",
-            rua: "Rua",
-            numero: "Número",
-            bairro: "Bairro",
-            cidade: "Cidade",
-            data_coleta: "Data Coleta",
-        };
+        const labels = {protocolo:"Protocolo", nome:"Nome", email:"E-mail", telefone:"Telefone", rua:"Rua", numero:"Número", bairro:"Bairro", cidade:"Cidade", data_coleta:"Data Coleta"};
+        let materiais = [], dadosFormatados=[{campo:"Protocolo", valor:protocolo}];
+        data.forEach(item=>{if(item.name==="material[]"){materiais.push(item.value)}else{let label=labels[item.name]||item.name; dadosFormatados.push({campo:label, valor:item.value});}});
+        if(materiais.length>0){dadosFormatados.push({campo: materiais.length>1?"Materiais":"Material", valor: materiais.join(", ")});}
+        salvarRegistro(dadosFormatados);
+        $('#coleta-form')[0].reset();
+        $('body').prepend(`<div class="success-msg">Sua coleta foi agendada com sucesso!</div>`);
+        setTimeout(()=>$('.success-msg').fadeOut(500,function(){$(this).remove();}),3000);
 
-        // Separar materiais e outros campos
-        let materiais = [];
-        let dadosFormatados = [
-            { campo: "Protocolo", valor: protocolo }
-        ];
-
-        data.forEach(item => {
-            if(item.name === "material[]"){
-                materiais.push(item.value);
-            } else {
-                let label = labels[item.name] || item.name;
-                dadosFormatados.push({ campo: label, valor: item.value });
-            }
-        });
-
-        // Adicionar os materiais formatados
-        if(materiais.length > 0){
-            let labelMaterial = materiais.length > 1 ? "Materiais" : "Material";
-            dadosFormatados.push({
-                campo: labelMaterial,
-                valor: materiais.join(", ")
-            });
-        }
-
-        // Atualiza opções de exportação
-        opcoes = {
-            ".PDF": () => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                // Título
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(16);
-                doc.text("Registro de Coleta", 105, 15, { align: "center" });
-
-                // Protocolo
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "italic");
-                doc.text(`Protocolo: ${protocolo}`, 105, 22, { align: "center" });
-
-                // Mensagem inicial
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "normal");
-                doc.text("Dados inseridos no formulário de solicitação de coleta:", 10, 32);
-
-                // Criar tabela formatada
-                let rows = dadosFormatados.map(item => [item.campo, item.valor]);
-
-                doc.autoTable({
-                    startY: 40,
-                    head: [["Campo", "Valor"]],
-                    body: rows,
-                    styles: { font: "helvetica", fontSize: 11 },
-                    headStyles: { fillColor: [41, 128, 185] },
-                    alternateRowStyles: { fillColor: [240, 240, 240] },
-                    margin: { left: 10, right: 10 }
-                });
-
-                // Rodapé com protocolo
-                let pageHeight = doc.internal.pageSize.height;
-                doc.setFontSize(10);
-                doc.setFont("helvetica", "italic");
-                doc.text(`Protocolo: ${protocolo}`, 10, pageHeight - 10);
-
-                // Baixar PDF
-                doc.save(`formulario-${protocolo}.pdf`);
-            },
-            ".TXT": () => {
-                let texto = "";
-                dadosFormatados.forEach(item => {
-                    texto += `${item.campo}: ${item.valor}\n`;
-                });
-
-                let blob = new Blob([texto], { type: "text/plain" });
-                let link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `formulario-${protocolo}.txt`;
-                link.click();
-            },
-            ".JSON": () => {
-                let dadosJson = {
-                    protocolo,
-                    dados: dadosFormatados.map(item => ({ [item.campo]: item.valor }))
-                };
-
-                let blob = new Blob([JSON.stringify(dadosJson)], { type: "application/json" });
-                let link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `formulario-${protocolo}.json`;
-                link.click();
-            }
-        };
-        
-        let opcoesHtml = Object.keys(opcoes).map(opcao => 
-            `<button class="btn btn-outline export-btn" data-opcao="${opcao}">${opcao}</button>`
-            ).join(" ");
-
-        let janela = `
-            <div class="export-window">
-                <div class="export-title">
-                    Exportar para:
-                    <button class="close-btn" onClick="$('.export-window').fadeOut(200)">
-                        X
-                    </button>
-                </div>
-                <div class="export-options">${opcoesHtml}</div>
-            </div>
-        `;
-
-        $("body").append(janela);
-        $(".export-window").fadeIn(200);
+        // Vai para registros
+        $('.tab').removeClass('active'); $('.tab[data-tab="registros"]').addClass('active');
+        $('.tab-content').removeClass('active'); $('#registros').addClass('active');
     });
-});
 
+    // Abrir janela de exportação
+    $(document).on('click','.record-card .export-btn', function(){
+        let index = $(this).data('index');
+        let registros = JSON.parse(localStorage.getItem('registros')) || [];
+        exportRegistroData = registros[index];
+
+        let opcoesHtml = [".PDF",".TXT",".JSON"].map(opcao=>`<button class="btn btn-outline export-option" data-opcao="${opcao}">${opcao}</button>`).join(" ");
+        $('.export-options').html(opcoesHtml);
+        $('.export-window').fadeIn(200);
+    });
+
+    // Fechar janela
+    $('.close-btn').click(function(){ $('.export-window').fadeOut(200); });
+
+    // Exportar selecionando formato
+    $(document).on('click','.export-option', function(){
+        let formato = $(this).data('opcao');
+        if(exportRegistroData) baixarRegistro(formato, exportRegistroData);
+        $('.export-window').fadeOut(200);
+    });
+
+    // Inicializar registros
+    atualizarListaRegistros();
+});
 </script>
 </body>
 </html>
