@@ -109,6 +109,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 <script>
 $(document).ready(function(){
+    $(document).on('click', '.tab', function() {
+        const target = $(this).data('tab');
+        $('.tab').removeClass('active');
+        $(this).addClass('active');
+        $('.tab-content').removeClass('active');
+        $('#' + target).addClass('active');
+    });
+
+    // --- mesma lógica de data mínima ---
     let hoje = new Date();
     hoje.setDate(hoje.getDate() + 3);
     let ano = hoje.getFullYear();
@@ -117,18 +126,189 @@ $(document).ready(function(){
     let dataMin = `${ano}-${mes}-${dia}`;
     $("#data_coleta").attr("min", dataMin);
 
+    // Variáveis
     let exportRegistroData = null;
+    let cordovaReady = false;
 
-    // Tabs
-    $('.tab').click(function(){
-        $('.tab').removeClass('active');
-        $(this).addClass('active');
-        let tabId = $(this).data('tab');
-        $('.tab-content').removeClass('active');
-        $('#' + tabId).addClass('active');
-    });
+    // Função simples de feedback (toast visual)
+    function showFeedback(msg, tempo=3500){
+        // remove toast antigo
+        $('.ecotoast').remove();
+        const toast = $(`<div class="ecotoast">${msg}</div>`).css({
+            position:'fixed', left:'50%', transform:'translateX(-50%)',
+            bottom:'24px', padding:'10px 16px', 'background-color':'#2d9cdb',
+            color:'#fff', 'border-radius':'8px', 'z-index':9999, 'box-shadow':'0 4px 12px rgba(0,0,0,0.2)'
+        });
+        $('body').append(toast);
+        setTimeout(()=>toast.fadeOut(300, ()=>toast.remove()), tempo);
+    }
 
-    // Protocolo
+    // Deviceready (Cordova)
+    document.addEventListener('deviceready', function() {
+        cordovaReady = true;
+        console.log('deviceready ✅ plugins?', {
+            file: !!cordova.file,
+            resolver: !!window.resolveLocalFileSystemURL,
+            opener2: !!(cordova.plugins && cordova.plugins.fileOpener2),
+            permissions: !!(cordova.plugins && cordova.plugins.permissions)
+        });
+
+        // pedir permissão READ/WRITE caso plugin exista (Android < 11; não faz mal pedir)
+        if (cordova.plugins && cordova.plugins.permissions) {
+            const perms = cordova.plugins.permissions;
+            perms.checkPermission(perms.WRITE_EXTERNAL_STORAGE, function(status) {
+                if (!status.hasPermission) {
+                    perms.requestPermission(perms.WRITE_EXTERNAL_STORAGE, function(s){ console.log('WRITE perm granted?', s); }, function(){ console.warn('WRITE perm denied'); });
+                }
+            }, function(err){
+                console.warn('checkPermission erro', err);
+            });
+        }
+    }, false);
+
+    // Função que salva Blob numa fileEntry e resolve o caminho (usa nativeURL)
+    function salvarArquivo(nomeArquivo, blob) {
+        return new Promise((resolve, reject) => {
+            if (!cordovaReady || !window.resolveLocalFileSystemURL || !cordova.file) {
+                return reject(new Error('Cordova ou plugin de arquivos não disponível'));
+            }
+            const dirPath = cordova.file.externalDataDirectory || cordova.file.dataDirectory;
+            console.log('salvando em', dirPath + nomeArquivo);
+
+            window.resolveLocalFileSystemURL(dirPath, function(dirEntry) {
+                dirEntry.getFile(nomeArquivo, { create: true }, function(fileEntry) {
+                    fileEntry.createWriter(function(fileWriter) {
+                        fileWriter.onwriteend = function() {
+                            // prefer nativeURL; se não, usar toURL()
+                            const url = fileEntry.nativeURL || fileEntry.toURL();
+                            console.log('arquivo escrito, url:', url);
+                            resolve(url);
+                        };
+                        fileWriter.onerror = function(e) {
+                            console.error('fileWriter error', e);
+                            reject(e);
+                        };
+                        fileWriter.write(blob);
+                    }, function(err){ console.error('createWriter err', err); reject(err); });
+                }, function(err){ console.error('getFile err', err); reject(err); });
+            }, function(err){ console.error('resolveLocalFileSystemURL err', err); reject(err); });
+        });
+    }
+
+    // Tenta abrir com fileOpener2; se falhar, mostra feedback com o caminho
+    function abrirArquivo(caminho, mime) {
+        if (window.cordova && cordova.plugins && cordova.plugins.fileOpener2) {
+            cordova.plugins.fileOpener2.open(
+                caminho,
+                mime,
+                {
+                    error: function(e) {
+                        console.warn('fileOpener2 erro', e);
+                        // tentar variações: com/sem file://
+                        if (!caminho.startsWith('file://')) {
+                            const alt = 'file://' + caminho;
+                            cordova.plugins.fileOpener2.open(alt, mime, {
+                                error: function(e2){ console.error('tentativa alt também falhou', e2); showFeedback('Arquivo salvo: ' + caminho); },
+                                success: function(){ console.log('aberto com alt'); }
+                            });
+                        } else {
+                            showFeedback('Arquivo salvo: ' + caminho);
+                        }
+                    },
+                    success: function() { console.log('Arquivo aberto com sucesso'); }
+                }
+            );
+        } else {
+            console.log('fileOpener2 não disponível. Arquivo em:', caminho);
+            showFeedback('Arquivo salvo em: ' + caminho);
+        }
+    }
+
+    // Função principal de exportação
+    async function baixarRegistro(formato, registro){
+        try {
+            let protocolo = registro.find(r=>r.campo==="Protocolo").valor;
+
+            if(formato === ".PDF"){
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFont("helvetica","bold"); doc.setFontSize(16);
+                doc.text("Registro de Coleta",105,15,{align:"center"});
+                doc.setFont("helvetica","italic"); doc.setFontSize(11);
+                doc.text(`Protocolo: ${protocolo}`,105,22,{align:"center"});
+                doc.setFont("helvetica","normal"); doc.setFontSize(12);
+                doc.text("Dados inseridos no formulário de solicitação de coleta:",10,32);
+
+                let rows = registro.map(i=>[i.campo,i.valor]);
+                doc.autoTable({
+                    startY:40,
+                    head:[["Campo","Valor"]],
+                    body:rows,
+                    styles:{font:"helvetica",fontSize:11},
+                    headStyles:{fillColor:[41,128,185]},
+                    alternateRowStyles:{fillColor:[240,240,240]},
+                    margin:{left:10,right:10}
+                });
+
+                let pageHeight = doc.internal.pageSize.height;
+                doc.setFontSize(10); doc.setFont("helvetica","italic");
+                doc.text(`Protocolo: ${protocolo}`,10,pageHeight-10);
+
+                if (cordovaReady) {
+                    // gerar blob e salvar
+                    let pdfBlob = doc.output("blob");
+                    const nome = `formulario-${protocolo}.pdf`;
+                    showFeedback('Salvando PDF...');
+                    const caminho = await salvarArquivo(nome, pdfBlob);
+                    showFeedback('PDF salvo');
+                    abrirArquivo(caminho, 'application/pdf');
+                } else {
+                    // fallback navegador
+                    doc.save(`formulario-${protocolo}.pdf`);
+                    showFeedback('Download iniciado (navegador)');
+                }
+            }
+            else if(formato === ".TXT"){
+                let texto = registro.map(i=>`${i.campo}: ${i.valor}`).join("\n");
+                let blob = new Blob([texto],{type:"text/plain"});
+                const nome = `formulario-${protocolo}.txt`;
+                if (cordovaReady) {
+                    showFeedback('Salvando TXT...');
+                    const caminho = await salvarArquivo(nome, blob);
+                    showFeedback('TXT salvo');
+                    abrirArquivo(caminho, 'text/plain');
+                } else {
+                    let link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = nome;
+                    link.click();
+                    showFeedback('Download iniciado (navegador)');
+                }
+            }
+            else if(formato === ".JSON"){
+                let dadosJson = {protocolo, dados: registro.map(i=>({[i.campo]:i.valor}))};
+                let blob = new Blob([JSON.stringify(dadosJson,null,2)],{type:"application/json"});
+                const nome = `formulario-${protocolo}.json`;
+                if (cordovaReady) {
+                    showFeedback('Salvando JSON...');
+                    const caminho = await salvarArquivo(nome, blob);
+                    showFeedback('JSON salvo');
+                    abrirArquivo(caminho, 'application/json');
+                } else {
+                    let link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = nome;
+                    link.click();
+                    showFeedback('Download iniciado (navegador)');
+                }
+            }
+        } catch (err) {
+            console.error('Erro em baixarRegistro:', err);
+            alert('Erro ao exportar: ' + (err && err.message ? err.message : JSON.stringify(err)));
+        }
+    }
+
+    // restante do seu código (forms, salvarRegistro, lista, etc.)
     function gerarProtocolo(){
         let now = new Date();
         let ano = now.getFullYear();
@@ -143,7 +323,6 @@ $(document).ready(function(){
         return `ECO-${ano}${mes}${dia}-${hora}${min}${seg}-${random}`;
     }
 
-    // Salvar e exibir registros
     function salvarRegistro(dados){
         let registros = JSON.parse(localStorage.getItem('registros')) || [];
         registros.push(dados);
@@ -165,44 +344,6 @@ $(document).ready(function(){
         $('#lista-registros').html(html);
     }
 
-    // Exportação para PDF, TXT, JSON
-    function baixarRegistro(formato, registro){
-        let protocolo = registro.find(r=>r.campo==="Protocolo").valor;
-        if(formato === ".PDF"){
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFont("helvetica","bold"); doc.setFontSize(16);
-            doc.text("Registro de Coleta",105,15,{align:"center"});
-            doc.setFont("helvetica","italic"); doc.setFontSize(11);
-            doc.text(`Protocolo: ${protocolo}`,105,22,{align:"center"});
-            doc.setFont("helvetica","normal"); doc.setFontSize(12);
-            doc.text("Dados inseridos no formulário de solicitação de coleta:",10,32);
-            let rows = registro.map(i=>[i.campo,i.valor]);
-            doc.autoTable({startY:40, head:[["Campo","Valor"]], body:rows, styles:{font:"helvetica",fontSize:11}, headStyles:{fillColor:[41,128,185]}, alternateRowStyles:{fillColor:[240,240,240]}, margin:{left:10,right:10}});
-            let pageHeight = doc.internal.pageSize.height;
-            doc.setFontSize(10); doc.setFont("helvetica","italic");
-            doc.text(`Protocolo: ${protocolo}`,10,pageHeight-10);
-            doc.save(`formulario-${protocolo}.pdf`);
-        }
-        else if(formato === ".TXT"){
-            let texto = registro.map(i=>`${i.campo}: ${i.valor}`).join("\n");
-            let blob = new Blob([texto],{type:"text/plain"});
-            let link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `formulario-${protocolo}.txt`;
-            link.click();
-        }
-        else if(formato === ".JSON"){
-            let dadosJson = {protocolo, dados: registro.map(i=>({[i.campo]:i.valor}))};
-            let blob = new Blob([JSON.stringify(dadosJson)],{type:"application/json"});
-            let link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `formulario-${protocolo}.json`;
-            link.click();
-        }
-    }
-
-    // Submit do formulário
     $('#coleta-form').on('submit',function(e){
         e.preventDefault();
         let data = $(this).serializeArray();
